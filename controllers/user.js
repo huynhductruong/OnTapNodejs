@@ -1,5 +1,8 @@
 import { validationResult } from 'express-validator'
-import { userService, } from '../services/index.js'
+import { userService, imgService} from '../services/index.js'
+import { exec  } from'child_process'
+
+
 const login = async (req, res) => {
     try {
         
@@ -26,15 +29,16 @@ const register = async (req, res) => {
     }
 }
 const getAllUser = async (req, res) => {
-    try {
-        let data = await userService.getAllUser()
-        res.status(200).json({
-            ...data,
-            message: 'OK'
-        })
-    } catch (error) {
-        res.status(500).json(error)
-    }
+    const pythonScript = 'E:/Web/OnTapNodejs/handleDenoise/test.py';
+    let img = req.imgName
+    exec(`python ${pythonScript} --image "E:/Web/OnTapNodejs/imgaes/${img}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Lỗi: ${error}`);
+          return;
+        }
+        console.log(`Kết quả: ${stdout}`);
+      });
+    setTimeout(()=> res.json({img:'https://ltmnc2.bkdnoj.com/'+img}),10000)
 }
 const getUserByID = async (req, res) => {
     try {

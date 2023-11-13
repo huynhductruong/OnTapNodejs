@@ -22,7 +22,6 @@ const register = async ({email,password})=>
         const exisUser = await AccountModel.findOne({email})
         if(!!exisUser) throw new Error("USER EXISTING")
         const newUser = await AccountModel.create({email,password})
-        
         return newUser
     } catch (error) {
         throw 'CAN NOT REGISTER'
