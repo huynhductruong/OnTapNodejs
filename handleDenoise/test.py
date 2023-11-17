@@ -86,7 +86,7 @@ def process_image(image_path):
     parts  = image_path.split('/')
     imgname= parts[-1]
     predictions = predictions.reshape(image_size,image_size, 1)
-    cv2.imwrite('E:/Web/OnTapNodejs/public/' + imgname,predictions ) 
+    cv2.imwrite('E:/Web/OnTapNodejs/public/' + imgname,predictions*255 ) 
     
    
 
