@@ -28,18 +28,44 @@ const register = async (req, res) => {
         res.status(500).json(error)
     }
 }
-const getAllUser = async (req, res) => {
+const Denoising = async (req, res) => {
     const pythonScript = 'E:/Web/OnTapNodejs/handleDenoise/test.py';
     let img = req.imgName
-    exec(`python ${pythonScript} --image "E:/Web/OnTapNodejs/imgaes/${img}"`, (error, stdout, stderr) => {
+    exec(`python ${pythonScript} --image "E:/Web/OnTapNodejs/images/${img}"`, (error, stdout, stderr) => {
         if (error) {
           console.error(`Lỗi: ${error}`);
           return;
         }
         console.log(`Kết quả: ${stdout}`);
       });
-    setTimeout(()=> res.json({img:'https://ltmnc2.bkdnoj.com/'+img}),10000)
+    setTimeout(()=> res.json({img:'http://localhost:3001/'+img}),20000)
+
 }
+const Diagnosis = async (req, res) => {
+    const pythonScript = 'E:/Web/OnTapNodejs/handleDiagnoisis/main.py';
+    let img = req.imgName
+    let result = []
+    result.push({img:'http://localhost:3001/'+img})
+    exec(`python ${pythonScript} --image "E:/Web/OnTapNodejs/images/${img}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Lỗi: ${error}`);
+          return;
+        }
+        const outputLines = stdout.trim().split('\n');
+        let count = outputLines.length
+        for(let i =2;i<count-1;i+=2)
+        {
+            result.push({
+                name:outputLines[i],
+                ac:outputLines[i+1]
+            })
+        }
+        
+      });
+    setTimeout(()=> res.json(result),20000)
+
+}
+
 const getUserByID = async (req, res) => {
     try {
         const { id } = req.params
@@ -94,7 +120,8 @@ const getUserByPage = async (req,res) =>
     }
 }
 export default {
-    getAllUser,
+    Denoising,
+    Diagnosis,
     getUserByID,
     addUser,
     login,

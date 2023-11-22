@@ -57,7 +57,7 @@ args = parser.parse_args()
 
 image_path = args.image
 
-image_size = 600
+image_size = 500
 
 
 def process_image(image_path):
@@ -79,7 +79,7 @@ def process_image(image_path):
     processed_image = processed_image / 255.0
 
     # Dùng mô hình học máy để dự đoán
-
+    print('OK')
     predictions = model.predict(np.expand_dims(processed_image, axis=0))
     # predictions = np.uint8(np.clip(predictions, 0, 255))
     # predictions = np.uint8(np.clip(predictions, 0, 255))

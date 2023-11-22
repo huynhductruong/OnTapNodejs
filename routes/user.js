@@ -10,5 +10,5 @@ route.post('/login',body('email').isEmail(),body('password').isLength({min:5}),u
 route.post('/register',userController.register)
 route.get('/page/:page',userController.getUserByPage)
 route.get('/:id',query('id').notEmpty(),userController.getUserByID)
-route.post('/',upload.any(),userController.getAllUser)
+
 export default route
