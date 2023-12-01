@@ -59,34 +59,46 @@ image_path = args.image
 
 image_size = 500
 
+def unsharp_mask(image, sigma=1.0, strength=1.5):
+    blurred = cv2.GaussianBlur(image, (0, 0), sigma)
+    sharpened = float(strength + 1) * image - float(strength) * blurred
+    sharpened = np.maximum(sharpened, 0)
+    sharpened = np.minimum(sharpened, 255)
+    sharpened = sharpened.astype(np.uint8)
+    return sharpened
 
 def process_image(image_path):
 
     # Dinh nghia bien
 
     # Load model
-    model = load_model("E:/Web/OnTapNodejs/handleDenoise/denoise_model.h5")
+    model = load_model("E:/Web/OnTapNodejs/handleDenoise/denoise_model.h5",compile=False)
 
     # Đọc ảnh từ đường dẫn
     image = cv2.imread(image_path)
 
     processed_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     processed_image = cv2.resize(processed_image, (image_size, image_size))
-
-    # Thực hiện xử lý ảnh, ví dụ: chuẩn hóa và điều chỉnh kích thước
-    # processed_image = cv2.resize(image, (600, 600))
-    # Chuẩn hóa pixel về khoảng [0, 1]
     processed_image = processed_image / 255.0
 
     # Dùng mô hình học máy để dự đoán
     print('OK')
     predictions = model.predict(np.expand_dims(processed_image, axis=0))
-    # predictions = np.uint8(np.clip(predictions, 0, 255))
-    # predictions = np.uint8(np.clip(predictions, 0, 255))
+
+    predictions=predictions.reshape(image_size, image_size,1) * 255
+    blurred = cv2.GaussianBlur(predictions, (0, 0), 3)
+
+    # Tính toán ảnh sharpened bằng cách lấy ảnh gốc trừ đi ảnh làm mịn
+    sharpened = cv2.addWeighted(predictions, 1.45, blurred, -0.45, 0)
+  
+    sharpened_image = unsharp_mask(sharpened)
+
+
     parts  = image_path.split('/')
     imgname= parts[-1]
-    predictions = predictions.reshape(image_size,image_size, 1)
-    cv2.imwrite('E:/Web/OnTapNodejs/public/' + imgname,predictions*255 ) 
+    
+    cv2.imwrite('E:/Web/OnTapNodejs/public/' + imgname,sharpened_image.reshape(image_size,
+               image_size, 1)) 
     
    
 

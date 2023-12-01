@@ -18,6 +18,6 @@ route(app)
 app.use(express.static(path.join('E:/Web/OnTapNodejs','public')))
 app.listen(process.env.PORT,()=> 
 {
-    
+    connect()
     console.log(`RUNNING IN PORT = ${process.env.PORT}`)
 })

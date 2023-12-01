@@ -1,105 +1,72 @@
-import { UserModel,AccountModel } from "../models/index.js"
+import { UserModel } from "../models/index.js"
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import { exec } from 'child_process'
 dotenv.config()
-const login = async ({email,password})=>
-{
+const login = async ({ email, password }) => {
     try {
-        const user = await AccountModel.findOne({email,password})
-        if(!!user) 
-        {
-            let accessToken = jwt.sign({...user,password:'NOT SHOW'},process.env.SECRET_KEY)
-            return accessToken
+        const user = await UserModel.findOne({ email, password })
+        if (!!user) {
+            // let accessToken = jwt.sign({...user,password:'NOT SHOW'},process.env.SECRET_KEY)
+            return user
         }
         else throw "USER NOT FOUND"
     } catch (error) {
-       throw "CAN NOT LOGIN"
+        throw "CAN NOT LOGIN"
     }
 }
-const register = async ({email,password})=>
-{
+const register = async ({ email, password, name }) => {
     try {
-        const exisUser = await AccountModel.findOne({email})
-        if(!!exisUser) throw new Error("USER EXISTING")
-        const newUser = await AccountModel.create({email,password})
-        return newUser
+        const exisUser = await UserModel.findOne({ email })
+        if (!!exisUser) throw new Error("USER EXISTING")
+        const newUser = await UserModel.create({ email, password, name })
+        return { ...newUser, password: 'not Show' }
     } catch (error) {
         throw 'CAN NOT REGISTER'
     }
 }
-const getAllUser = async ()=>
-{
-    try {
-        const users = await UserModel.find({})
-        return users
-    } catch (error) {
-       throw error
-    }
+function executeDenoising(img) {
+    return new Promise((resolve, reject) => {
+        const pythonScript = 'E:/Web/OnTapNodejs/handleDenoise/test.py';
+
+        exec(`python ${pythonScript} --image "E:/Web/OnTapNodejs/images/${img}"`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Lỗi: ${error}`);
+                reject(error)
+                return;
+            }
+            console.log(`Kết quả: ${stdout}`);
+            resolve(stdout)
+        });
+    });
 }
-const getUserByID = async ({id})=>
-{
-    try {
-        const users = await UserModel.findById(id)
-        if(!!users) return users
-        else  throw 'NULL'
-    } catch (error) {
-        throw error
-    }
-}
-const addUser = async ({name,email,gender})=>
-{
-    try {
-        const newuser =await UserModel.create({name,email,gender})
-        
-        return newuser
-    } catch (error) {
-        throw "CAN NOT ADD USER"
-    }
-}
-const updateUser = async ({id,valueUpdate})=>
-{
-    try {
-        
-        const user = await UserModel.updateOne({_id:id},{...valueUpdate})
-       
-        return user
-    } catch (error) {
-        throw "CAN NOT ADD USER"
-    }
-}
-const deleteUser = async ({id})=>
-{
-    try {
-        
-        await UserModel.deleteOne({_id:id})
-        return "OK"
-    } catch (error) {
-        throw "CAN NOT DELETE USER"
-    }
-}
-const getUserByPage  = async ({page,size}) =>
-{
-    try {
-        let filterData = UserModel.aggregate([
-            {$match:{
-                name:{$regex :"truo",$options:'i'},
-                
-            }},
-            {$skip: (page-1)*size},
-            {$limit:size}
-        ])
-        return filterData
-    } catch (error) {
-        throw error
-    }
+function executeDiagnosis(img) {
+    return new Promise((resolve, reject) => {
+        const pythonScript = 'E:/Web/OnTapNodejs/handleDiagnoisis/main.py';
+
+        let result = []
+        result.push({ img: 'http://localhost:3001/' + img })
+        exec(`python ${pythonScript} --image "E:/Web/OnTapNodejs/images/${img}"`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Lỗi: ${error}`);
+                reject(error)
+            }
+            const outputLines = stdout.trim().split('\n');
+            let count = outputLines.length
+            for (let i = 2; i < count - 1; i += 2) {
+                result.push({
+                    name: outputLines[i],
+                    ac: outputLines[i + 1]
+                })
+            }
+            resolve(result)
+
+        });
+    });
 }
 export default {
     login,
     register,
-    getAllUser,
-    getUserByID,
-    addUser,
-    updateUser,
-    deleteUser,
-    getUserByPage
+    executeDenoising,
+    executeDiagnosis
 }

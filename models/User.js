@@ -18,13 +18,13 @@ export default mongoose.model('User',
                 message: 'Email is incorrect format'
             }
         },
-        gender: {
+        password: {
             type: String,
-            enum: {
-                values: ['Male', 'Famale'],
-                message: '{VALUE is not supported}'
-            },
-            require: true
+            require: true,
+            validate: {
+                validator: value => value.length >= 5,
+                message: 'Password must be at least 4 characters'
+            }
         }
     },
         {
