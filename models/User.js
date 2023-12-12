@@ -25,6 +25,16 @@ export default mongoose.model('User',
                 validator: value => value.length >= 5,
                 message: 'Password must be at least 4 characters'
             }
+        },
+        image:{
+            type:String,
+
+        },
+        phone:{
+            type:String
+        },
+        address:{
+            type:String
         }
     },
         {

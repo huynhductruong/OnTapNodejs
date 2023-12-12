@@ -7,8 +7,9 @@ const login = async ({ email, password }) => {
     try {
         const user = await UserModel.findOne({ email, password })
         if (!!user) {
-            // let accessToken = jwt.sign({...user,password:'NOT SHOW'},process.env.SECRET_KEY)
-            return user
+   
+            let accessToken = jwt.sign({ ...user._doc, password: 'NOT SHOW' }, process.env.SECRET_KEY)
+            return accessToken
         }
         else throw "USER NOT FOUND"
     } catch (error) {
@@ -20,7 +21,9 @@ const register = async ({ email, password, name }) => {
         const exisUser = await UserModel.findOne({ email })
         if (!!exisUser) throw new Error("USER EXISTING")
         const newUser = await UserModel.create({ email, password, name })
-        return { ...newUser, password: 'not Show' }
+       
+        let accessToken = jwt.sign({ ...newUser._doc, password: 'NOT SHOW' }, process.env.SECRET_KEY)
+        return accessToken
     } catch (error) {
         throw 'CAN NOT REGISTER'
     }
@@ -64,9 +67,19 @@ function executeDiagnosis(img) {
         });
     });
 }
+const updateUser = async ({ name, image, phone, address, id }) => {
+    try {
+        let user = await UserModel.findByIdAndUpdate(id, { name, image, phone, address }, { new: true })
+        let accessToken = jwt.sign({ ...user._doc, password: 'NOT SHOW' }, process.env.SECRET_KEY)
+        return accessToken
+    } catch (error) {
+        throw "CAN NOT UPDATE"
+    }
+}
 export default {
     login,
     register,
+    updateUser,
     executeDenoising,
     executeDiagnosis
 }
